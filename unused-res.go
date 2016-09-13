@@ -5,22 +5,33 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 )
 
-const testDir string = "/Users/mitur/gits/TortugaSwift/tortuga_ios"
-
 func main() {
+	var dir string
+
+	if len(os.Args) < 2 {
+		td, err := os.Getwd()
+		if err != nil {
+			fmt.Println("Could not get current working directory")
+		}
+		dir = td
+	} else {
+		dir = os.Args[1]
+	}
+
 	searcher := NewResSearcher()
-	err := searcher.FindExistingStrings(testDir)
+	err := searcher.FindExistingStrings(dir)
 	if err != nil {
-		fmt.Println("Failed to find existing strings:", err)
+		fmt.Println(err)
 		return
 	}
 
 	fmt.Println("Existing strings:", len(searcher.ExistingStrings))
-	searcher.SearchDir(testDir)
+	searcher.SearchDir(dir)
 	// searcher.PrintResults()
 
 	unusedStrings := searcher.GetUnusedStrings()
@@ -30,6 +41,14 @@ func main() {
 	}
 
 	fmt.Println("unused Strings:", len(unusedStrings))
+}
+
+func getPWD() string {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return dir
 }
 
 type Occurence struct {
